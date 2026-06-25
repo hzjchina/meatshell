@@ -35,15 +35,29 @@ component SingleTab inherits Rectangle {
         padding-left: 10px;
         padding-right: 6px;
         spacing: 8px;
-        alignment: start;
+        // NOTE: deliberately NO `alignment: start` here. With `start` the title
+        // Text's `horizontal-stretch: 1` is ignored, so a short title (e.g.
+        // "pve") leaves the close "×" sitting in the MIDDLE of the tab — easy to
+        // misclick. Default (stretch) alignment lets the title absorb the slack
+        // and pushes the close button to the tab's right edge instead.
 
-        // Status indicator
-        Rectangle {
+        // Leading glyph. The welcome ("新标签页" / New tab) tab shows a "+"
+        // since it's the new-tab entry point; real session tabs keep the
+        // connection status dot (grey / green / amber).
+        if info.kind == "welcome" : Text {
+            text: "+";
+            color: active ? Theme.text-primary : Theme.text-secondary;
+            font-size: Theme.fs-md;
+            font-weight: 600;
+            width: 8px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+        if info.kind != "welcome" : Rectangle {
             width: 8px; height: 8px;
             y: (parent.height - self.height) / 2;
             border-radius: 4px;
-            background: info.kind == "welcome" ? Theme.text-muted
-                : (info.connected ? Theme.success : Theme.warning);
+            background: info.connected ? Theme.success : Theme.warning;
         }
 
         Text {
@@ -105,12 +119,13 @@ export component TabBar inherits Rectangle {
                     selected => { root.tab-selected(tab.id); }
                     closed => { root.tab-closed(tab.id); }
                 }
+                /*
                 IconButton {
                     glyph: "+";
                     size: 28px;
                     y: (parent.height - self.height) / 2;
                     clicked => { root.new-tab(); }
-                }
+                }*/
             }
         }
 
